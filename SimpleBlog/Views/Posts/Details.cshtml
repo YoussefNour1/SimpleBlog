@@ -33,12 +33,17 @@
 <hr />
 
 <div>
-    @* نعرض المحتوى من الـ Model *@
     @Model.Content
 </div>
 
 <hr />
 
 <div>
-    <a asp-action="Index">Back to List</a> @* لينك للرجوع لصفحة Index باستخدام Tag Helper *@
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-dark">Edit</a> 
+    <form asp-action="Delete" asp-controller="Posts" method="post" style="display:inline;"
+          onsubmit="return confirm('Are you absolutely sure you want to delete the post titled \'@Model.Title\'? This action cannot be undone.');">
+        <input type="hidden" asp-for="Id" /> 
+        <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+    <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
 </div>

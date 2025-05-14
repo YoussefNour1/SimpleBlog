@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SimpleBlog.Data;
 using SimpleBlog.Entities;
@@ -9,11 +10,11 @@ namespace SimpleBlog.Controllers
 {
     public class PostsController(IMessageSender MessageSender, SimpleBlogDbContext Context) : Controller
     {
-        private readonly IMessageSender _messageSender= MessageSender;
+        private readonly IMessageSender _messageSender = MessageSender;
         private readonly SimpleBlogDbContext _context = Context;
         public async Task<IActionResult> Index()
         {
-            var result =await _context.Posts.ToListAsync();
+            var result = await _context.Posts.ToListAsync();
             var posts = result.Select(p => new PostViewModel
             {
                 Id = p.Id,
@@ -36,10 +37,10 @@ namespace SimpleBlog.Controllers
             var post = new PostViewModel
             {
                 Id = Result.Id,
-                Title = Result.Title?? "No title",
-                Content = Result.Content?? "No Content",
-                PublicationDate =Result.PublicationDate,
-                Author = Result.Author?? "No Author"
+                Title = Result.Title ?? "No title",
+                Content = Result.Content ?? "No Content",
+                PublicationDate = Result.PublicationDate,
+                Author = Result.Author ?? "No Author"
             };
             return View(post);
         }
@@ -50,6 +51,7 @@ namespace SimpleBlog.Controllers
             return View();
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateAsync(PostViewModel post)
         {
             if (ModelState.IsValid)
@@ -66,6 +68,77 @@ namespace SimpleBlog.Controllers
                 return RedirectToAction("Index");
             }
             return View(post);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int Id)
+        {
+            var Result = await _context.Posts.FirstOrDefaultAsync(p => p.Id == Id);
+            if (Result == null)
+            {
+                return NotFound();
+            }
+            var post = new PostViewModel
+            {
+                Id = Result.Id,
+                Title = Result.Title,
+                Content = Result.Content,
+                PublicationDate = Result.PublicationDate,
+                Author = Result.Author
+            };
+            return View(post);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(PostViewModel postViewModel)
+        {
+
+            if (!ModelState.IsValid)
+            {
+                return View(postViewModel);
+            }
+
+            var postToUpdate = await _context.Posts.FindAsync(postViewModel.Id);
+
+            if (postToUpdate == null)
+            {
+                return NotFound();
+            }
+            postToUpdate.Title = postViewModel.Title;
+            postToUpdate.Content = postViewModel.Content;
+            postToUpdate.Author = postViewModel.Author;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Posts.Any(e => e.Id == postViewModel.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return RedirectToAction("Details", new { Id = postViewModel.Id });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int Id)
+        {
+            var PostToDelete = await _context.Posts.FindAsync(Id);
+            if (PostToDelete == null)
+            {
+                return NotFound();
+            }
+            _context.Posts.Remove(PostToDelete);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Index");
         }
     }
 }
