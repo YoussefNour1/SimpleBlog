@@ -1,0 +1,34 @@
+﻿@model IEnumerable<SimpleBlog.ViewModels.PostViewModel>
+
+@{
+    ViewData["Title"] = "Blog Posts";
+}
+
+<h1>All Blog Posts</h1>
+<p>Welcome to our blog! Here you can find all the latest posts.</p>
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New Post</a> @* زرار يودي لصفحة إنشاء مقالة جديدة *@
+<hr />
+
+@if (Model == null || !Model.Any())
+{
+    <p>No posts available yet. Check back soon!</p>
+}
+else
+{
+    @foreach (var post in Model) // نلف على كل مقالة في اللستة اللي جاية في الـ Model
+    {
+        <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px;">
+            @* تنسيق بسيط لكل مقالة *@
+            <h3>@post.Title</h3> @* عرض عنوان المقالة *@
+            <div>
+                <small>By: @post.Author on @post.PublicationDate.ToString("MMMM dd, yyyy")</small> @* عرض الكاتب وتاريخ النشر بتنسيق معين *@
+            </div>
+            <p style="margin-top: 10px;">
+                @* لينك يودي لصفحة تفاصيل المقالة دي بالذات *@
+                <a asp-action="Details" asp-controller="Posts" asp-route-id="@post.Id" class="btn btn-primary btn-sm">Read More</a>
+            </p>
+        </div>
+        <hr style="border-top: 1px dashed #eee;" /> @* خط فاصل بسيط بين المقالات *@
+    }
+}

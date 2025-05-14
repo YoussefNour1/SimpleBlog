@@ -1,0 +1,44 @@
+﻿@* نحدد نوع الـ Model اللي الـ View ده مستنيه *@
+@model SimpleBlog.ViewModels.PostViewModel
+
+@{
+    ViewData["Title"] = Model.Title; // نستخدم عنوان المقالة كعنوان للصفحة
+}
+
+<h1>@Model.Title</h1>
+
+<hr />
+
+<dl class="row">
+    <dt class="col-sm-2">
+        Author:
+    </dt>
+    <dd class="col-sm-10">
+        @Model.Author
+    </dd>
+    <dt class="col-sm-2">
+        Published On:
+    </dt>
+    <dd class="col-sm-10">
+        @Model.PublicationDate.ToShortDateString()
+    </dd>
+    <dt class="col-sm-2">
+        Post ID:
+    </dt>
+    <dd class="col-sm-10">
+        @Model.Id
+    </dd>
+</dl>
+
+<hr />
+
+<div>
+    @* نعرض المحتوى من الـ Model *@
+    @Model.Content
+</div>
+
+<hr />
+
+<div>
+    <a asp-action="Index">Back to List</a> @* لينك للرجوع لصفحة Index باستخدام Tag Helper *@
+</div>
