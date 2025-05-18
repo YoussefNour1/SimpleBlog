@@ -6,9 +6,11 @@
 
 <h1>All Blog Posts</h1>
 <p>Welcome to our blog! Here you can find all the latest posts.</p>
-<p>
+@if (User != null && User.Identity.IsAuthenticated)
+{   
     <a asp-action="Create" class="btn btn-primary">Create New Post</a> @* زرار يودي لصفحة إنشاء مقالة جديدة *@
-<hr />
+    <hr />
+}
 
 @if (Model == null || !Model.Any())
 {

@@ -1,4 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity; // مهمة جدًا
 
 namespace SimpleBlog.Entities
 {
@@ -6,11 +9,20 @@ namespace SimpleBlog.Entities
     {
         [Key]
         public int Id { get; set; }
+
         [Required(ErrorMessage = "Title is required.")]
-        public string? Title { get; set; }
-        [MaxLength(800, ErrorMessage = "Content cannot exceed 800 characters.")]
-        public string? Content { get; set; }
-        public DateTime PublicationDate { get; set; } // تاريخ النشر
-        public string? Author { get; set; } // اسم الكاتب
+        [MaxLength(200)]
+        public string Title { get; set; }
+
+        [Required]
+        [MaxLength(800)]
+        public string Content { get; set; }
+        public DateTime PublicationDate { get; set; }
+        public string? UserId { get; set; } // ده هيشاور على الـ Id في جدول AspNetUsers
+        public string? AuthorName { get; set; } // ده هنخزن فيه اسم الكاتب (UserName)
+
+        // الـ Navigation Property للـ User
+        [ForeignKey("UserId")]
+        public virtual IdentityUser? User { get; set; }
     }
 }
