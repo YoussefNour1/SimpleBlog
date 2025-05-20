@@ -1,0 +1,51 @@
+﻿@model IEnumerable<SimpleBlog.ViewModels.UserRoleViewModel>;
+
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<h1>User Management</h1>
+<hr />
+
+@if (!Model.Any())
+{
+    <p>No users found.</p>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Roles</th>
+                <th>Actions</th> @* هنضيف هنا لينكات التعديل بعدين *@
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td><small>@user.UserId</small></td>
+                    <td>@user.UserName</td>
+                    <td>@user.UserEmail</td>
+                    <td>
+                        @if (user.Roles.Any())
+                        {
+                            @string.Join(", ", user.Roles)
+                        }
+                        else
+                        {
+                            <span class="text-muted">No roles assigned</span>
+                        }
+                    </td>
+                    <td>
+                        @* TODO: Add link to Edit User Roles later *@
+                        <a asp-action="ManageUserRoles" asp-controller="Admin" asp-route-id="@user.UserId" class="btn btn-sm btn-primary">Manage Roles</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

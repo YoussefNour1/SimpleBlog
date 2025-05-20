@@ -1,0 +1,45 @@
+﻿@*A view to manage user roles by the admin*@
+@model SimpleBlog.ViewModels.ManageUserRolesViewModel
+@{
+    ViewData["Title"] = "User Management";
+}
+<h1>User Management</h1>
+<hr />
+@{
+    ViewData["Title"] = "Manage Roles for " + Model.UserName;
+}
+
+<h2>@ViewData["Title"]</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form method="post">
+            @* الـ asp-action هيتحدد في الـ POST action *@
+            <input type="hidden" asp-for="UserId" /> @* مهم عشان نبعت الـ UserId مع الفورم *@
+
+            <div class="card">
+                <div class="card-header">
+                    Assign Roles
+                </div>
+                <div class="card-body">
+                    @for (int i = 0; i < Model.Roles.Count; i++)
+                    {
+                        <div class="form-check m-1">
+                            <input type="hidden" asp-for="@Model.Roles[i].RoleName" /> @* عشان نبعت اسم الدور *@
+                            <input asp-for="@Model.Roles[i].IsSelected" class="form-check-input" />
+                            <label class="form-check-label" asp-for="@Model.Roles[i].IsSelected">
+                                @Model.Roles[i].RoleName
+                            </label>
+                        </div>
+                    }
+                    <div asp-validation-summary="All" class="text-danger"></div> @* لو فيه أي أخطاء في الـ Model *@
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary" style="width:auto">Update Roles</button>
+                    <a asp-action="Dashboard" class="btn btn-secondary" style="width:auto">Cancel</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

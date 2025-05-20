@@ -39,7 +39,7 @@ namespace SimpleBlog.Controllers
             {
                 var LoggedUser = await _user.GetUserAsync(User);
                 var LoggedUserId = await _user.GetUserIdAsync(LoggedUser);
-                flag = LoggedUserId == Result.UserId;
+                flag = LoggedUserId == Result.UserId || User.IsInRole("Admin");
             }
             if (Result == null)
             {
@@ -99,7 +99,7 @@ namespace SimpleBlog.Controllers
             var LoggedUser = await _user.GetUserAsync(User);
             var LoggedUserId = await _user.GetUserIdAsync(LoggedUser);
 
-            if (Result?.UserId != LoggedUserId)
+            if (Result?.UserId != LoggedUserId && !User.IsInRole("Admin"))
             {
                 return Forbid();
             }
@@ -113,7 +113,7 @@ namespace SimpleBlog.Controllers
                 Title = Result.Title,
                 Content = Result.Content,
                 PublicationDate = Result.PublicationDate,
-                Author = _user.GetUserName(User) ?? "No Author"
+                Author = Result.AuthorName ?? "No Author"
             };
             return View(post);
         }
@@ -130,7 +130,7 @@ namespace SimpleBlog.Controllers
             {
                 return NotFound();
             }
-            if (LoggedUserId != postToUpdate?.UserId)
+            if (LoggedUserId != postToUpdate?.UserId && !User.IsInRole("Admin"))
             {
                 return Forbid();
             }
@@ -172,7 +172,7 @@ namespace SimpleBlog.Controllers
             }
             var LoggedUser = await _user.GetUserAsync(User);
             var LoggedUserId = await _user.GetUserIdAsync(LoggedUser);
-            if (LoggedUserId != PostToDelete?.UserId)
+            if (LoggedUserId != PostToDelete?.UserId && !User.IsInRole("Admin"))
             {
                 return Forbid();
             }
