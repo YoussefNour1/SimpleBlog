@@ -1,7 +1,13 @@
-﻿@model IEnumerable<SimpleBlog.ViewModels.PostViewModel>
+﻿@model SimpleBlog.ViewModels.PostsViewModel
 
 @{
     ViewData["Title"] = "Blog Posts";
+    int currentPage = Model.PageIndex;
+    int totalPages = Model.TotalPages;
+    int maxPagesToShowAroundCurrent = 2; // عدد الصفحات اللي هتظهر قبل وبعد الصفحة الحالية
+    int startPage = Math.Max(1, currentPage - maxPagesToShowAroundCurrent);
+    int endPage = Math.Min(totalPages, currentPage + maxPagesToShowAroundCurrent);
+
 }
 
 <h1>All Blog Posts</h1>
@@ -12,13 +18,13 @@
     <hr />
 }
 
-@if (Model == null || !Model.Any())
+@if (Model == null || !Model.Posts.Any())
 {
     <p>No posts available yet. Check back soon!</p>
 }
 else
 {
-    @foreach (var post in Model) // نلف على كل مقالة في اللستة اللي جاية في الـ Model
+    @foreach (var post in Model.Posts) // نلف على كل مقالة في اللستة اللي جاية في الـ Model
     {
         <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px;">
             @* تنسيق بسيط لكل مقالة *@
@@ -32,5 +38,100 @@ else
             </p>
         </div>
         <hr style="border-top: 1px dashed #eee;" /> @* خط فاصل بسيط بين المقالات *@
+    }
+    @* لو في صفحات تانية من المقالات، نعرضها *@
+    @if (Model.TotalPages > 0) // هنعرضه حتى لو صفحة واحدة عشان المستخدم يبقى عارف
+    {
+        <nav aria-label="Page navigation example" class="mt-4">
+            <ul class="pagination justify-content-center">
+
+                @* زرار Previous *@
+                @if (Model.HasPreviousPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PageIndex - 1)" aria-label="Previous">
+                            <span aria-hidden="true">&laquo; Previous</span>
+                        </a>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                            <span aria-hidden="true">&laquo; Previous</span>
+                        </a>
+                    </li>
+                }
+
+                @* أرقام الصفحات (النسخة البسيطة اللي بتعرض كل الأرقام حاليًا) *@
+                @* @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                        @* بنضيف كلاس "active" للصفحة الحالية عشان يبقى شكلها مختلف 
+                        <a class="page-link" asp-action="Index" asp-route-pageNumber="@i">@i</a>
+                    </li>
+                } 
+                *@
+                @{
+                    // لو النافذة صغيرة في الأول، حاول تكبرها من اليمين
+                    if (startPage == 1 && (endPage - startPage + 1) < (maxPagesToShowAroundCurrent * 2 + 1) && totalPages > (maxPagesToShowAroundCurrent * 2 + 1))
+                    {
+                        endPage = Math.Min(totalPages, (maxPagesToShowAroundCurrent * 2 + 1));
+                    }
+                    // لو النافذة صغيرة في الآخر، حاول تكبرها من الشمال
+                    else if (endPage == totalPages && (endPage - startPage + 1) < (maxPagesToShowAroundCurrent * 2 + 1) && totalPages > (maxPagesToShowAroundCurrent * 2 + 1))
+                    {
+                        startPage = Math.Max(1, totalPages - (maxPagesToShowAroundCurrent * 2));
+                    }
+
+
+                    // لينك للصفحة الأولى لو هي مش ظاهرة في النافذة
+                    if (startPage > 1)
+                    {
+                        <li class="page-item"><a class="page-link" asp-action="Index" asp-route-pageNumber="1">1</a></li>
+                        if (startPage > 2) // لو فيه فاصل بين الأولى وبداية النافذة
+                        {
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        }
+                    }
+
+                    // أرقام الصفحات اللي جوه النافذة
+                    for (int i = startPage; i <= endPage; i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-pageNumber="@i">@i</a>
+                        </li>
+                    }
+
+                    // لينك للصفحة الأخيرة لو هي مش ظاهرة في النافذة
+                    if (endPage < totalPages)
+                    {
+                        if (endPage < totalPages - 1) // لو فيه فاصل بين نهاية النافذة والأخيرة
+                        {
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        }
+                        <li class="page-item"><a class="page-link" asp-action="Index" asp-route-pageNumber="@totalPages">@totalPages</a></li>
+                    }
+                }
+
+                @* زرار Next *@
+                @if (Model.HasNextPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PageIndex + 1)" aria-label="Next">
+                            <span aria-hidden="true">Next &raquo;</span>
+                        </a>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                            <span aria-hidden="true">Next &raquo;</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
     }
 }

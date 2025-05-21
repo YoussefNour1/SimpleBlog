@@ -16,9 +16,21 @@ namespace SimpleBlog.Controllers
         private readonly IMessageSender _messageSender = MessageSender;
         private readonly SimpleBlogDbContext _context = Context;
         private readonly UserManager<IdentityUser> _user = user;
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pageNumber = 1)
         {
-            var result = await _context.Posts.ToListAsync();
+            var PostsPaginated = new PostsViewModel
+            {
+                PageIndex = pageNumber,
+                PageSize = 2,
+                TotalCount = await _context.Posts.CountAsync()
+            };
+            var result = await _context.Posts
+                .Include(p=> p.User)
+                .OrderByDescending(p=> p.PublicationDate)
+                .Skip((pageNumber - 1) * PostsPaginated.PageSize)
+                .Take(PostsPaginated.PageSize)
+                .ToListAsync();
+
             var posts = result.Select(p => new PostViewModel
             {
                 Id = p.Id,
@@ -27,8 +39,9 @@ namespace SimpleBlog.Controllers
                 PublicationDate = p.PublicationDate,
                 Author = p.AuthorName ?? "No author"
             }).OrderByDescending(p => p.PublicationDate).ToList();
+            PostsPaginated.Posts = posts;
             _messageSender.SendMessage("youssef", "Test", "This is a test message from the PostsController.");
-            return View(posts);
+            return View(PostsPaginated);
         }
 
         public async Task<IActionResult> Details(int Id)
