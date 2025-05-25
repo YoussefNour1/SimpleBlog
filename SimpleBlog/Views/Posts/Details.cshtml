@@ -2,51 +2,83 @@
 @model SimpleBlog.ViewModels.PostViewModel
 
 @{
-    ViewData["Title"] = Model.Title; // نستخدم عنوان المقالة كعنوان للصفحة
+    ViewData["Title"] = Model.Title;
 }
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="display-4">@Model.Title</h1>
+    <div class="ms-auto">
+        @if (User.Identity.IsAuthenticated && Model.flag == true)
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-dark">Edit</a>
+            <form asp-action="Delete" method="post" style="display:inline;"
+                  onsubmit="return confirm('Are you absolutely sure you want to delete the post titled \'@Model.Title\'? This action cannot be undone.');">
+                <input type="hidden" asp-for="Id" />
+                <button type="submit" class="btn btn-outline-danger">Delete</button>
+            </form>
+        }
+    </div>
+</div>
+<a asp-action="Index" class="btn btn-link mb-3"><i class="fas fa-arrow-left"></i> Back to List</a>
+<hr class="mb-4" />
 
-<h1>@Model.Title</h1>
+<div class="post-meta mb-4 p-3" style="background-color: var(--bs-light-bg-subtle); border-radius: 0.375rem;">
+    <dl class="row mb-0">
+        <dt class="col-sm-3 col-md-2 text-muted">Author:</dt> @* زودت text-muted *@
+        <dd class="col-sm-9 col-md-10">@Model.Author</dd>
 
-<hr />
-
-<dl class="row">
-    <dt class="col-sm-2">
-        Author:
-    </dt>
-    <dd class="col-sm-10">
-        @Model.Author
-    </dd>
-    <dt class="col-sm-2">
-        Published On:
-    </dt>
-    <dd class="col-sm-10">
-        @Model.PublicationDate.ToShortDateString()
-    </dd>
-    <dt class="col-sm-2">
-        Post ID:
-    </dt>
-    <dd class="col-sm-10">
-        @Model.Id
-    </dd>
-</dl>
-
-<hr />
-
-<div>
-    @Model.Content
+        <dt class="col-sm-3 col-md-2 text-muted">Published On:</dt>
+        <dd class="col-sm-9 col-md-10">@Model.PublicationDate.ToLocalTime()</dd>
+    </dl>
 </div>
 
 <hr />
-<div>
-    @if (User != null && User.Identity.IsAuthenticated && Model.flag.GetValueOrDefault())
-    {
-        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-dark">Edit</a>
-        <form asp-action="Delete" asp-controller="Posts" method="post" style="display:inline;"
-              onsubmit="return confirm('Are you absolutely sure you want to delete the post titled \'@Model.Title\'? This action cannot be undone.');">
-            <input type="hidden" asp-for="Id" />
-            <button type="submit" class="btn btn-danger">Delete</button>
-        </form>
 
+<div class="post-content lead mb-5">
+    @Html.Raw(Model.Content?.Replace(Environment.NewLine, "<br />"))
+    @* @Html.Raw(Model.Content) *@
+</div>
+<hr />
+
+<div class="comments-section mt-5">
+    <h4 class="mb-3">Comments (@Model.Comments?.Count)</h4> 
+    <hr />
+
+    @if (Model.Comments == null || !Model.Comments.Any())
+    {
+        <p class="text-muted">No comments yet. Be the first to comment!</p>
     }
-    <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
+    else
+    {
+        @foreach (var comment in Model.Comments)
+        {
+            <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="card-subtitle text-primary mb-1">@(comment.User?.UserName ?? comment.User?.Email)</h6>
+                        <small class="text-light">@comment.PublicationDate.ToString("g")</small> 
+                    </div>
+                    <p class="card-text mt-2">@Html.Raw(comment.Content?.Replace(Environment.NewLine, "<br />"))</p>
+                    @* TODO: Add Edit/Delete comment buttons for comment owner or Admin *@
+                </div>
+            </div>
+        }
+    }
+
+    @if (User.Identity != null && User.Identity.IsAuthenticated)
+    {
+        <div class="add-comment-form mt-4 p-3" style="background-color: var(--bs-tertiary-bg); border-radius: 0.375rem;">
+            <h5>Add a Comment</h5>
+            <form asp-action="Create" asp-controller="Comments" method="post">
+                <input type="hidden" name="PostId" value="@Model.Id" />
+                <div class="mb-3">
+                    <textarea class="form-control" name="Content" rows="4" placeholder="Write your comment here..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit Comment</button>
+            </form>
+        </div>
+    }
+    else
+    {
+        <p class="mt-4">Please <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("Details", "Posts", new { Id = Model.Id })">log in</a> to add a comment.</p>
+    }
 </div>

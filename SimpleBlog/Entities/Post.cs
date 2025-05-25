@@ -24,5 +24,6 @@ namespace SimpleBlog.Entities
         // الـ Navigation Property للـ User
         [ForeignKey("UserId")]
         public virtual IdentityUser? User { get; set; }
+        public virtual ICollection<Comment>? Comments { get; set; }
     }
 }

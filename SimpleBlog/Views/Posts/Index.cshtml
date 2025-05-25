@@ -1,51 +1,67 @@
-﻿@model SimpleBlog.ViewModels.PostsViewModel
+﻿@model SimpleBlog.ViewModels.PostsViewModel;
 
 @{
-    ViewData["Title"] = "Blog Posts";
+    ViewData["Title"] = "All Blog Posts";
+    if (Model.PageIndex > 1)
+    {
+        ViewData["Title"] = $"Blog Posts - Page {Model.PageIndex}";
+    }
+
     int currentPage = Model.PageIndex;
     int totalPages = Model.TotalPages;
-    int maxPagesToShowAroundCurrent = 2; // عدد الصفحات اللي هتظهر قبل وبعد الصفحة الحالية
+    int maxPagesToShowAroundCurrent = 2;
     int startPage = Math.Max(1, currentPage - maxPagesToShowAroundCurrent);
     int endPage = Math.Min(totalPages, currentPage + maxPagesToShowAroundCurrent);
-
+    if (startPage == 1 && (endPage - startPage + 1) < (maxPagesToShowAroundCurrent * 2 + 1) && totalPages > (maxPagesToShowAroundCurrent * 2 + 1)) { endPage = Math.Min(totalPages, (maxPagesToShowAroundCurrent * 2 + 1)); }
+    else if (endPage == totalPages && (endPage - startPage + 1) < (maxPagesToShowAroundCurrent * 2 + 1) && totalPages > (maxPagesToShowAroundCurrent * 2 + 1)) { startPage = Math.Max(1, totalPages - (maxPagesToShowAroundCurrent * 2)); }
 }
 
-<h1>All Blog Posts</h1>
-<p>Welcome to our blog! Here you can find all the latest posts.</p>
-@if (User != null && User.Identity.IsAuthenticated)
-{   
-    <a asp-action="Create" class="btn btn-primary">Create New Post</a> @* زرار يودي لصفحة إنشاء مقالة جديدة *@
-    <hr />
-}
+<div class="container mt-4"> 
+    <div class="text-center mb-4"> 
+        <h1 class="display-4">All Blog Posts</h1> 
+        <p class="lead">Welcome to our blog! Here you can find all the latest posts.</p>
+    </div>
 
-@if (Model == null || !Model.Posts.Any())
-{
-    <p>No posts available yet. Check back soon!</p>
-}
-else
-{
-    @foreach (var post in Model.Posts) // نلف على كل مقالة في اللستة اللي جاية في الـ Model
+    @if (User.Identity != null && User.Identity.IsAuthenticated)
     {
-        <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px;">
-            @* تنسيق بسيط لكل مقالة *@
-            <h3>@post.Title</h3> @* عرض عنوان المقالة *@
-            <div>
-                <small>By: @post.Author on @post.PublicationDate.ToString("MMMM dd, yyyy")</small> @* عرض الكاتب وتاريخ النشر بتنسيق معين *@
-            </div>
-            <p style="margin-top: 10px;">
-                @* لينك يودي لصفحة تفاصيل المقالة دي بالذات *@
-                <a asp-action="Details" asp-controller="Posts" asp-route-id="@post.Id" class="btn btn-primary btn-sm">Read More</a>
-            </p>
+        <div class="mb-4 text-center">
+            <a asp-action="Create" class="btn btn-lg btn-primary"> <i class="fas fa-plus-circle"></i> Create New Post</a> 
         </div>
-        <hr style="border-top: 1px dashed #eee;" /> @* خط فاصل بسيط بين المقالات *@
     }
-    @* لو في صفحات تانية من المقالات، نعرضها *@
-    @if (Model.TotalPages > 0) // هنعرضه حتى لو صفحة واحدة عشان المستخدم يبقى عارف
-    {
-        <nav aria-label="Page navigation example" class="mt-4">
-            <ul class="pagination justify-content-center">
 
-                @* زرار Previous *@
+    @if (Model == null || !Model.Posts.Any())
+    {
+        <div class="alert alert-info text-center" role="alert">
+            No posts available yet. Check back soon!
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            @foreach (var post in Model.Posts)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm"> 
+                        <div class="card-body d-flex flex-column"> 
+                            <h4 class="card-title">@post.Title</h4>
+                            <small class="text-muted mb-2">
+                                By: @post.Author on @post.PublicationDate.ToString("MMMM dd, yyyy")
+                            </small>
+                            @*<p class="card-text">@post. .....</p>*@
+                            <div class="mt-auto">
+                                <a asp-action="Details" asp-controller="Posts" asp-route-id="@post.Id" class="btn btn-outline-primary">Read More</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    @if (Model.TotalPages > 1) 
+    {
+        <nav aria-label="Page navigation" class="mt-5 d-flex justify-content-center"> 
+            <ul class="pagination">
                 @if (Model.HasPreviousPage)
                 {
                     <li class="page-item">
@@ -57,64 +73,35 @@ else
                 else
                 {
                     <li class="page-item disabled">
-                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
-                            <span aria-hidden="true">&laquo; Previous</span>
-                        </a>
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&laquo; Previous</a>
                     </li>
                 }
 
-                @* أرقام الصفحات (النسخة البسيطة اللي بتعرض كل الأرقام حاليًا) *@
-                @* @for (int i = 1; i <= Model.TotalPages; i++)
+                @if (startPage > 1)
                 {
-                    <li class="page-item @(i == Model.PageIndex ? "active" : "")">
-                        @* بنضيف كلاس "active" للصفحة الحالية عشان يبقى شكلها مختلف 
+                    <li class="page-item"><a class="page-link" asp-action="Index" asp-route-pageNumber="1">1</a></li>
+                    @if (startPage > 2)
+                    {
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    }
+                }
+
+                @for (int i = startPage; i <= endPage; i++)
+                {
+                    <li class="page-item @(i == currentPage ? "active" : "")">
                         <a class="page-link" asp-action="Index" asp-route-pageNumber="@i">@i</a>
                     </li>
-                } 
-                *@
-                @{
-                    // لو النافذة صغيرة في الأول، حاول تكبرها من اليمين
-                    if (startPage == 1 && (endPage - startPage + 1) < (maxPagesToShowAroundCurrent * 2 + 1) && totalPages > (maxPagesToShowAroundCurrent * 2 + 1))
-                    {
-                        endPage = Math.Min(totalPages, (maxPagesToShowAroundCurrent * 2 + 1));
-                    }
-                    // لو النافذة صغيرة في الآخر، حاول تكبرها من الشمال
-                    else if (endPage == totalPages && (endPage - startPage + 1) < (maxPagesToShowAroundCurrent * 2 + 1) && totalPages > (maxPagesToShowAroundCurrent * 2 + 1))
-                    {
-                        startPage = Math.Max(1, totalPages - (maxPagesToShowAroundCurrent * 2));
-                    }
-
-
-                    // لينك للصفحة الأولى لو هي مش ظاهرة في النافذة
-                    if (startPage > 1)
-                    {
-                        <li class="page-item"><a class="page-link" asp-action="Index" asp-route-pageNumber="1">1</a></li>
-                        if (startPage > 2) // لو فيه فاصل بين الأولى وبداية النافذة
-                        {
-                            <li class="page-item disabled"><span class="page-link">...</span></li>
-                        }
-                    }
-
-                    // أرقام الصفحات اللي جوه النافذة
-                    for (int i = startPage; i <= endPage; i++)
-                    {
-                        <li class="page-item @(i == currentPage ? "active" : "")">
-                            <a class="page-link" asp-action="Index" asp-route-pageNumber="@i">@i</a>
-                        </li>
-                    }
-
-                    // لينك للصفحة الأخيرة لو هي مش ظاهرة في النافذة
-                    if (endPage < totalPages)
-                    {
-                        if (endPage < totalPages - 1) // لو فيه فاصل بين نهاية النافذة والأخيرة
-                        {
-                            <li class="page-item disabled"><span class="page-link">...</span></li>
-                        }
-                        <li class="page-item"><a class="page-link" asp-action="Index" asp-route-pageNumber="@totalPages">@totalPages</a></li>
-                    }
                 }
 
-                @* زرار Next *@
+                @if (endPage < totalPages)
+                {
+                    @if (endPage < totalPages - 1)
+                    {
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    }
+                    <li class="page-item"><a class="page-link" asp-action="Index" asp-route-pageNumber="@totalPages">@totalPages</a></li>
+                }
+
                 @if (Model.HasNextPage)
                 {
                     <li class="page-item">
@@ -126,12 +113,10 @@ else
                 else
                 {
                     <li class="page-item disabled">
-                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
-                            <span aria-hidden="true">Next &raquo;</span>
-                        </a>
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next &raquo;</a>
                     </li>
                 }
             </ul>
         </nav>
     }
-}
+</div>

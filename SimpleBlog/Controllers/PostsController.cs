@@ -21,7 +21,7 @@ namespace SimpleBlog.Controllers
             var PostsPaginated = new PostsViewModel
             {
                 PageIndex = pageNumber,
-                PageSize = 2,
+                PageSize = 6,
                 TotalCount = await _context.Posts.CountAsync()
             };
             var result = await _context.Posts
@@ -65,6 +65,7 @@ namespace SimpleBlog.Controllers
                 Content = Result.Content ?? "No Content",
                 PublicationDate = Result.PublicationDate,
                 Author = Result.User.Email ?? "No Author",
+                Comments = [.. _context.Comments.Where(c => c.PostId == Result.Id).Include(c=> c.User)],
                 flag = flag
             };
             return View(post);
