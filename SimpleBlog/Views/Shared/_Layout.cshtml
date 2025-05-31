@@ -1,29 +1,45 @@
-﻿<!DOCTYPE html>
+﻿<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="SimpleBlog - Your Awesome Blog">
+    <meta name="author" content="Your Name or Blog Name">
     <title>@ViewData["Title"] - SimpleBlog</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:100,200,300,400,500,600,700|Playfair+Display:400,700,900" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/animate.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/main.css" asp-append-version="true">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/SimpleBlog.styles.css" asp-append-version="true" />
+    <script src="https://cdn.tiny.cloud/1/82u28nluhhp7wnr739bd27tri1pnpidlf1de38hzjfv9cjp6/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom text-light box-shadow mb-3" data-bs-theme="dark">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SimpleBlog</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+    <header class="mb-3">
+        <nav class="navbar navbar-expand-lg navbar-dark cyan fixed-top">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    @*
+                    <img src="~/images/nav-logo.png" alt="SimpleBlog Logo" style="max-height: 80px; width:auto">
+                   *@
+                    <h3 style="font-family: 'Pacifico', cursive; ">
+                        <span style="color: white;">Simple</span><span style="color: #FFD700;">Blog</span>
+                    </h3>
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent-4" aria-controls="navbarSupportedContent-4" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between ms-auto">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="collapse navbar-collapse" id="navbarSupportedContent-4">
+                    <ul class="navbar-nav mr-auto">
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Posts" asp-action="Index">Posts</a>
+                            <a class="nav-link" asp-area="" asp-controller="Posts" asp-action="Index">Blog Posts</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
@@ -34,20 +50,109 @@
             </div>
         </nav>
     </header>
-    <div class="container">
+
+    <div class="container" style="padding-top: 70px;">
         <main role="main" class="pb-3">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["ErrorMessage"]
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            }
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - SimpleBlog - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
+    <footer class="mt-5">
+        <section class="footer-top">
+            <div class="container">
+                <h2>My Flickr Feed (Example Section)</h2>
+                <div class="row text-center text-lg-left">
+                    <div class="col-lg-2 col-md-4 col-xs-6">
+                        <a href="#" class="d-block h-100"><img class="img-fluid img-thumbnail" src="~/images/banner-image-1.jpg" alt=""></a>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-xs-6">
+                        <a href="#" class="d-block h-100"><img class="img-fluid img-thumbnail" src="~/images/banner-image-2.jpg" alt=""></a>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-xs-6">
+                        <a href="#" class="d-block h-100"><img class="img-fluid img-thumbnail" src="~/images/banner-image-3.jpg" alt=""></a>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-xs-6">
+                        <a href="#" class="d-block h-100"><img class="img-fluid img-thumbnail" src="~/images/banner-image-4.jpg" alt=""></a>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-xs-6">
+                        <a href="#" class="d-block h-100"><img class="img-fluid img-thumbnail" src="~/images/banner-image-2.jpg" alt=""></a>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-xs-6">
+                        <a href="#" class="d-block h-100"><img class="img-fluid img-thumbnail" src="~/images/banner-image-1.jpg" alt=""></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="footer-bottom">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <ul>
+                            <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
+                            <li class="hidden">/</li>
+                            <li><a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy Policy</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-12">
+                        <p>
+                            &copy; @DateTime.Now.Year - SimpleBlog - (C) All Rights Reserved <a href="https://www.github.com/YoussefNour1/SimpleBlog" style="font-family: 'Pacifico', cursive; " target="_blank">
+                                <i>
+                                    <span style="color: white;">Simple</span><span style="color: #FFD700;">Blog</span>
+                                </i>
+                            </a> <span>/</span> Designed and Developed by <a href="https://www.linkedin.com/in/youssef-nour-6b13251b0/" target="_blank">Youssef Nour</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
     </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <a href="javascript:" id="return-to-top"><i class="fa fa-long-arrow-up" aria-hidden="true"></i></a>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.js"></script>
+    <script src="~/js/animate.js" asp-append-version="true"></script>
+    <script src="~/js/custom.js" asp-append-version="true"></script>
+    <script>
+        $(document).on('click', '[data-toggle="lightbox"]', function(event) {
+            event.preventDefault();
+            $(this).ekkoLightbox();
+        });
+        // Add your custom JS for return-to-top if it's in custom.js or here
+        $(window).scroll(function() {
+            if ($(this).scrollTop() >= 50) {
+                $('#return-to-top').fadeIn(200);
+            } else {
+                $('#return-to-top').fadeOut(200);
+            }
+        });
+        $('#return-to-top').click(function() {
+            $('body,html').animate({
+                scrollTop : 0
+            }, 500);
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -1,39 +1,57 @@
 ﻿@using Microsoft.AspNetCore.Identity
+@using SimpleBlog.Entities
 
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@{
+    var CurrentUser = await UserManager.GetUserAsync(User);
+    var UserDisplayName = CurrentUser?.DisplayName;
+    var UserProfileImagePath = CurrentUser?.ProfileImagePath;
+    if (UserDisplayName == null)
+    {
+        UserDisplayName = UserManager.GetUserName(User);
+    }
+    if (string.IsNullOrEmpty(UserProfileImagePath))
+    {
+        UserProfileImagePath = Url.Content("~/images/profiles/default-avatar.png");
+    }
+}
 
-<ul class="navbar-nav ms-auto">
+<ul class="navbar-nav ml-auto">
     @if (SignInManager.IsSignedIn(User))
     {
         <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownUserLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                @UserManager.GetUserName(User)
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownUserLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                @*Surround the image with colored Circle*@
+                <img src="@UserProfileImagePath" alt="User Profile Image" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover; margin-right: 5px;" />
+
+                @* Hello @UserDisplayName *@
             </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUserLink">
-                <li><a class="dropdown-item" asp-area="" asp-controller="Posts" asp-action="Create">Create Post</a></li>
-                <li><a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Manage Account</a></li>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownUserLink">
+                <p class="dropdown-item btn btn-link text-dark p-1" style="text-align: center; width: 100%;">@User.Identity?.Name</p>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" asp-area="" asp-controller="Posts" asp-action="Create">Create Post</a>
+                <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Manage Account</a>
                 @if (User.IsInRole("Admin"))
                 {
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" asp-area="" asp-controller="Admin" asp-action="Dashboard">Admin Dashboard</a></li>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" asp-area="" asp-controller="Admin" asp-action="Dashboard">Admin Dashboard</a>
                 }
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
-                        <button type="submit" class="dropdown-item btn btn-link">Logout</button>
-                    </form>
-                </li>
-            </ul>
+                <div class="dropdown-divider"></div>
+                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
+                    <button type="submit" class="dropdown-item btn btn-link text-dark p-0" style="text-align: center; width: 100%;">Logout</button>
+                </form>
+            </div>
         </li>
     }
     else
     {
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
+            <a class="nav-link" asp-area="Identity" asp-page="/Account/Register">Register</a>
         </li>
+        <p class="text-light">OR</p>
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
+            <a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Login</a>
         </li>
     }
 </ul>

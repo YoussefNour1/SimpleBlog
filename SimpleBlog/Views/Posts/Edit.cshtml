@@ -9,10 +9,29 @@
 
 <div class="row">
     <div class="col-md-8">
-        <form asp-action="Edit" method="post">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
+            <div class="mb-3">
+                
+                <div>
+                    @if (!string.IsNullOrEmpty(Model.PostImagePath))
+                    {
+                        <img id="imagePreview" src="@Url.Content(Model.PostImagePath)" alt="Current Post Image" class="img-fluid rounded shadow-sm" style="max-height: 250px; display: block; margin-bottom: 10px;" />
+                    }
+                    else
+                    {
+                        <img id="imagePreview" src="#" alt="Image Preview" class="img-fluid rounded shadow-sm" style="max-height: 250px; display: none; margin-bottom: 10px;" />
+                        <p class="text-muted" id="noImageText">No current image.</p>
+                    }
+                </div>
+            </div>
 
+            <div class="mb-3">
+                <label asp-for="ImageFile" class="form-label">Upload New Image (optional, will replace current if chosen)</label>
+                <input asp-for="ImageFile" type="file" class="form-control" id="imageUploadInput" accept="image/png, image/jpeg, image/gif" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+            </div>
             <div class="mb-3">
                 <label asp-for="Title" class="form-label"></label>
                 <input asp-for="Title" class="form-control" />
@@ -27,6 +46,27 @@
 
             <div class="mb-3">
                 <label asp-for="Content" class="form-label"></label>
+                <!-- Place the following <script> and <textarea> tags your HTML's <body> -->
+                <script>
+                  tinymce.init({
+                    selector: 'textarea',
+                    plugins: [
+                      // Core editing features
+                      'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'image', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount',
+                      // Your account includes a free trial of TinyMCE premium features
+                      // Try the most popular premium features until Jun 13, 2025:
+                      'checklist', 'mediaembed', 'casechange', 'formatpainter', 'pageembed', 'a11ychecker', 'tinymcespellchecker', 'permanentpen', 'powerpaste', 'advtable', 'advcode', 'editimage', 'advtemplate', 'ai', 'mentions', 'tinycomments', 'tableofcontents', 'footnotes', 'mergetags', 'autocorrect', 'typography', 'inlinecss', 'markdown','importword', 'exportword', 'exportpdf'
+                    ],
+                    toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+                    tinycomments_mode: 'embedded',
+                    tinycomments_author: 'Author name',
+                    mergetags_list: [
+                      { value: 'First.Name', title: 'First Name' },
+                      { value: 'Email', title: 'Email' },
+                    ],
+                    ai_request: (request, respondWith) => respondWith.string(() => Promise.reject('See docs to implement AI Assistant')),
+                  });
+                </script>
                 <textarea asp-for="Content" class="form-control" rows="10"></textarea>
                 <span asp-validation-for="Content" class="text-danger"></span>
             </div>
@@ -49,4 +89,22 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        document.getElementById("imageUploadInput").addEventListener("change", function (event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById("imagePreview");
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.style.display = "block"; // Show the image preview
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.src = "#"; // Reset the preview if no file is selected
+                preview.style.display = "none"; // Hide the image preview
+            }
+        });
+    </script>
 }

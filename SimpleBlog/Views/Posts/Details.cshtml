@@ -1,84 +1,121 @@
-﻿@* نحدد نوع الـ Model اللي الـ View ده مستنيه *@
-@model SimpleBlog.ViewModels.PostViewModel
+﻿@model SimpleBlog.ViewModels.PostViewModel
 
 @{
-    ViewData["Title"] = Model.Title;
+    ViewData["Title"] = Model.Title ?? "Post Details";
 }
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="display-4">@Model.Title</h1>
-    <div class="ms-auto">
-        @if (User.Identity.IsAuthenticated && Model.flag == true)
-        {
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-dark">Edit</a>
-            <form asp-action="Delete" method="post" style="display:inline;"
-                  onsubmit="return confirm('Are you absolutely sure you want to delete the post titled \'@Model.Title\'? This action cannot be undone.');">
-                <input type="hidden" asp-for="Id" />
-                <button type="submit" class="btn btn-outline-danger">Delete</button>
-            </form>
-        }
+
+<div class="container">
+    <div class="main-contant">
+        <div class="row">
+            <div class="col-sm-12">
+                @if (!string.IsNullOrEmpty(Model.PostImagePath))
+                {
+                    <figure>
+                        <img src="@Url.Content(Model.PostImagePath)" class="figure-img img-fluid rounded" alt="@Model.Title" style="max-height: 450px; width: 100%; object-fit: cover;">
+                    </figure>
+                }
+                else
+                {
+                    <div>
+                    <img id="imagePreview" src="#" alt="Image Preview" class="img-fluid rounded shadow-sm" style="max-height: 250px; display: none; margin-bottom: 10px;" />
+                    <p class="text-muted" id="noImageText">No current image.</p>
+                    </div>
+                }
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h1 class="display-4">@Model.Title</h1>
+                    <div class="ms-auto">
+                        @if (User.Identity != null && User.Identity.IsAuthenticated && (User.IsInRole("Admin") || Model.IsOwner))
+                        {
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary btn-sm me-2">Edit</a>
+                            <form asp-action="Delete" method="post" style="display:inline;"
+                                  onsubmit="return confirm('Are you absolutely sure you want to delete the post titled \'@Model.Title\'? This action cannot be undone.');">
+                                <input type="hidden" asp-for="Id" />
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                            </form>
+                        }
+                    </div>
+                </div>
+                <a asp-action="Index" class="btn btn-link mb-3 ps-0"><i class="fa fa-arrow-left"></i> Back to List</a>
+
+                <div class="post-meta mb-4 p-3" style="background-color: #f8f9fa; border-radius: 0.25rem;">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-3 col-lg-2 text-muted">Author:</dt>
+                        <dd class="col-sm-9 col-lg-10">
+                            <div class="d-flex align-items-center">
+                                
+                                <img src="@Url.Content(Model.AuthorImage)" alt="@Model.Author"
+                                        class="rounded-circle mr-2"
+                                        style="width: 35px; height: 35px; object-fit: cover;" />
+                               
+                                <span class="fw-medium">@Model.Author</span>
+                            </div>
+                        </dd>
+
+                        <dt class="col-sm-3 col-md-2 text-muted">Published On:</dt>
+                        <dd class="col-sm-9 col-md-10">@Model.PublicationDate.ToLocalTime().ToString("D")</dd>
+                    </dl>
+                </div>
+
+                <hr class="mb-4" />
+
+                <div class="post-content lead" style="font-size: 1.1rem; line-height: 1.7;">
+                    @Html.Raw(Model.Content)
+                </div>
+
+                <hr class="mt-5 mb-4" />
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <h3 class="mb-3"><img src="@Url.Content("/images/comment.png")" width="30px" height="30px"/> Comments (@(Model.Comments?.Count ?? 0))</h3>
+                @if (Model.Comments == null || !Model.Comments.Any())
+                {
+                    <p class="text-muted">No comments yet. Be the first to comment!</p>
+                }
+                else
+                {
+                    foreach (var comment in Model.Comments)
+                    {
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h6 class="card-subtitle text-primary mb-1">@(comment.User?.UserName ?? comment.User?.Email ?? "Anonymous")</h6>
+                                    <small class="text-muted">@comment.PublicationDate.ToLocalTime().ToString("f")</small>
+                                </div>
+                                <p class="card-text mt-2 mb-0">@Html.Raw(comment.Content?.Replace(Environment.NewLine, "<br />"))</p>
+                            </div>
+                        </div>
+                    }
+                }
+
+                @if (User.Identity != null && User.Identity.IsAuthenticated)
+                {
+                    <div class="add-comment-form mt-4 p-3 card shadow-sm">
+                        <h5 class="card-title">Add a Comment</h5>
+                        <div class="card-body">
+                            <form asp-action="Create" asp-controller="Comments" method="post">
+                                <input type="hidden" name="PostId" value="@Model.Id" />
+                                <div class="form-group mb-3">
+                                    <textarea class="form-control" name="Content" rows="4" placeholder="Write your comment here..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-success">Submit Comment</button>
+                            </form>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <p class="mt-4">Please <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("Details", "Posts", new { Id = Model.Id })">log in</a> to add a comment.</p>
+                }
+            </div>
+        </div>
     </div>
 </div>
-<a asp-action="Index" class="btn btn-link mb-3"><i class="fas fa-arrow-left"></i> Back to List</a>
-<hr class="mb-4" />
 
-<div class="post-meta mb-4 p-3" style="background-color: var(--bs-light-bg-subtle); border-radius: 0.375rem;">
-    <dl class="row mb-0">
-        <dt class="col-sm-3 col-md-2 text-muted">Author:</dt> @* زودت text-muted *@
-        <dd class="col-sm-9 col-md-10">@Model.Author</dd>
-
-        <dt class="col-sm-3 col-md-2 text-muted">Published On:</dt>
-        <dd class="col-sm-9 col-md-10">@Model.PublicationDate.ToLocalTime()</dd>
-    </dl>
-</div>
-
-<hr />
-
-<div class="post-content lead mb-5">
-    @Html.Raw(Model.Content?.Replace(Environment.NewLine, "<br />"))
-    @* @Html.Raw(Model.Content) *@
-</div>
-<hr />
-
-<div class="comments-section mt-5">
-    <h4 class="mb-3">Comments (@Model.Comments?.Count)</h4> 
-    <hr />
-
-    @if (Model.Comments == null || !Model.Comments.Any())
-    {
-        <p class="text-muted">No comments yet. Be the first to comment!</p>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-    else
-    {
-        @foreach (var comment in Model.Comments)
-        {
-            <div class="card mb-3 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h6 class="card-subtitle text-primary mb-1">@(comment.User?.UserName ?? comment.User?.Email)</h6>
-                        <small class="text-light">@comment.PublicationDate.ToString("g")</small> 
-                    </div>
-                    <p class="card-text mt-2">@Html.Raw(comment.Content?.Replace(Environment.NewLine, "<br />"))</p>
-                    @* TODO: Add Edit/Delete comment buttons for comment owner or Admin *@
-                </div>
-            </div>
-        }
-    }
-
-    @if (User.Identity != null && User.Identity.IsAuthenticated)
-    {
-        <div class="add-comment-form mt-4 p-3" style="background-color: var(--bs-tertiary-bg); border-radius: 0.375rem;">
-            <h5>Add a Comment</h5>
-            <form asp-action="Create" asp-controller="Comments" method="post">
-                <input type="hidden" name="PostId" value="@Model.Id" />
-                <div class="mb-3">
-                    <textarea class="form-control" name="Content" rows="4" placeholder="Write your comment here..." required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Submit Comment</button>
-            </form>
-        </div>
-    }
-    else
-    {
-        <p class="mt-4">Please <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Url.Action("Details", "Posts", new { Id = Model.Id })">log in</a> to add a comment.</p>
-    }
-</div>
+}

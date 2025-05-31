@@ -8,9 +8,9 @@ using SimpleBlog.ViewModels;
 
 namespace SimpleBlog.Controllers
 {
-    public class CommentsController(UserManager<IdentityUser> userManager, SimpleBlogDbContext ctx, IMessageSender sender) : Controller
+    public class CommentsController(UserManager<ApplicationUser> userManager, SimpleBlogDbContext ctx, IMessageSender sender) : Controller
     {
-        private readonly UserManager<IdentityUser> _userManager = userManager;
+        private readonly UserManager<ApplicationUser> _userManager = userManager;
         private readonly SimpleBlogDbContext _ctx = ctx;
         private readonly IMessageSender _messageSender = sender;
 

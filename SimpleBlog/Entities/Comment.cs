@@ -15,7 +15,7 @@ namespace SimpleBlog.Entities
         public int PostId { get; set; }
 
         // Navigation properties
-        public virtual IdentityUser User { get; set; }
+        public virtual ApplicationUser User { get; set; }
         public virtual Post Post { get; set; }
     }
 }

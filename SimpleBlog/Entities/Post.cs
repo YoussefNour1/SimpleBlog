@@ -20,10 +20,11 @@ namespace SimpleBlog.Entities
         public DateTime PublicationDate { get; set; }
         public string? UserId { get; set; } // ده هيشاور على الـ Id في جدول AspNetUsers
         public string? AuthorName { get; set; } // ده هنخزن فيه اسم الكاتب (UserName)
+        public string? PostImagePath { get; set; } // path للصورة
 
         // الـ Navigation Property للـ User
         [ForeignKey("UserId")]
-        public virtual IdentityUser? User { get; set; }
+        public virtual ApplicationUser? User { get; set; }
         public virtual ICollection<Comment>? Comments { get; set; }
     }
 }

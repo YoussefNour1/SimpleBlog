@@ -4,63 +4,53 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SimpleBlog.Entities;
+using SimpleBlog.ViewModels;
 
 namespace SimpleBlog.Areas.Identity.Pages.Account.Manage
 {
     public class IndexModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IWebHostEnvironment _host;
 
         public IndexModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager)
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            IWebHostEnvironment host)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _host = host;
         }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public string Username { get; set; }
 
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         [TempData]
         public string StatusMessage { get; set; }
-
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         [BindProperty]
         public InputModel Input { get; set; }
-
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         public class InputModel
         {
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
+            [Display(Name = "Display Name")]
+            public string DisplayName { get; set; }
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
+            [Display(Name = "Profile Image")]
+            public IFormFile ImageFile { get; set; }
+            [AllowNull]
+            public string? Image { get; set; }
         }
 
-        private async Task LoadAsync(IdentityUser user)
+        private async Task LoadAsync(ApplicationUser user)
         {
             var userName = await _userManager.GetUserNameAsync(user);
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
@@ -69,7 +59,9 @@ namespace SimpleBlog.Areas.Identity.Pages.Account.Manage
 
             Input = new InputModel
             {
-                PhoneNumber = phoneNumber
+                PhoneNumber = phoneNumber,
+                Image = user.ProfileImagePath != null ? user.ProfileImagePath : null,
+                DisplayName = user.DisplayName
             };
         }
 
@@ -100,6 +92,7 @@ namespace SimpleBlog.Areas.Identity.Pages.Account.Manage
             }
 
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
+            user.DisplayName = Input.DisplayName;
             if (Input.PhoneNumber != phoneNumber)
             {
                 var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
@@ -110,9 +103,51 @@ namespace SimpleBlog.Areas.Identity.Pages.Account.Manage
                 }
             }
 
+            if (Input.ImageFile != null && Input.ImageFile.Length > 0)
+            {
+                if (!string.IsNullOrEmpty(user.ProfileImagePath))
+                {
+                    string oldImageServerPath = Path.Combine(_host.WebRootPath, user.ProfileImagePath.TrimStart('/'));
+                    if (System.IO.File.Exists(oldImageServerPath))
+                    {
+                        System.IO.File.Delete(oldImageServerPath);
+                    }
+                }
+                user.ProfileImagePath = await ProcessUploadedFile(Input.ImageFile);
+            }
+            await _userManager.UpdateAsync(user);
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";
             return RedirectToPage();
         }
+
+        private async Task<string?> ProcessUploadedFile(IFormFile? imageFile)
+        {
+            if (imageFile == null || imageFile.Length == 0)
+            {
+                return null;
+            }
+            string uploadsFolder = Path.Combine(_host.WebRootPath, "images", "profiles");
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+            string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(imageFile.FileName);
+            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+            try
+            {
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(fileStream);
+                }
+                return $"/images/profiles/{uniqueFileName}";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"""ErrorLog", "File Upload Error", {ex.Message}""");
+                return null;
+            }
+        }
     }
+
 }

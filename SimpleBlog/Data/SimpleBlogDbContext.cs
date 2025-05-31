@@ -17,7 +17,7 @@ namespace SimpleBlog.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<IdentityUser>().ToTable("AspNetUsers", t => t.ExcludeFromMigrations(true));
+            modelBuilder.Entity<ApplicationUser>().ToTable("AspNetUsers", t => t.ExcludeFromMigrations(true));
 
             modelBuilder.Entity<Post>()
                 .HasOne(p => p.User)
