@@ -12,6 +12,7 @@ namespace SimpleBlog.Data
 
         public DbSet<Post> Posts { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<Category> Categories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,6 +43,25 @@ namespace SimpleBlog.Data
                 .HasPrincipalKey(p => p.Id)
                 .OnDelete(DeleteBehavior.SetNull)
                 .IsRequired(true);
+
+            // many-to-many relationship between Post and Category  # No need for this in the current design
+            //modelBuilder.Entity<Post>()
+            //    .HasMany(p => p.Categories)
+            //    .WithMany(c => c.Posts)
+            //    .UsingEntity<Dictionary<string, object>>(
+            //        "PostCategory",
+            //        j => j
+            //            .HasOne<Category>()
+            //            .WithMany()
+            //            .HasForeignKey("CategoryId")
+            //            .HasPrincipalKey(c => c.Id)
+            //            .OnDelete(DeleteBehavior.Cascade),
+            //        j => j
+            //            .HasOne<Post>()
+            //            .WithMany()
+            //            .HasForeignKey("PostId")
+            //            .HasPrincipalKey(p => p.Id)
+            //            .OnDelete(DeleteBehavior.Cascade));
         }
     }
 }

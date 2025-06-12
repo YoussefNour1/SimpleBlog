@@ -2,7 +2,14 @@
 
 @{
     ViewData["Title"] = "User Management";
+    Layout = "_AdminLayout";
 }
+
+<div class="mb-4">
+    <h4>Admin Tools</h4>
+    <a asp-controller="Categories" asp-action="Index" class="btn btn-info me-2">Manage Categories</a>
+    @* <a asp-controller="Posts" asp-action="AdminIndex" class="btn btn-secondary">Manage All Posts</a> *@
+</div>
 
 <h1>User Management</h1>
 <hr />

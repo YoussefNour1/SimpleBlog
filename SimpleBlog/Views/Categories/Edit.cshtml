@@ -1,0 +1,49 @@
+﻿@model SimpleBlog.Entities.Category 
+
+@{
+    ViewBag.Title = $"Edit Category - {Model.Name}";
+    Layout = "_AdminLayout";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Edit Category: <span class="text-info">@Model.Name</span></h2>
+        <a asp-action="Index" asp-controller="Categories" class="btn btn-outline-secondary btn-sm">
+            <i class="fa fa-arrow-left"></i> Back to Categories List
+        </a>
+    </div>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0">Edit Category Name</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" asp-controller="Categories" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                        <input type="hidden" asp-for="Id" /> 
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Name" class="form-label">Category Name</label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <a class="btn btn-secondary" asp-action="Index" asp-controller="Categories">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -17,5 +17,9 @@ namespace SimpleBlog.ViewModels // اسم المشروع . اسم المجلد
         [Display(Name = "Post Image")]
         public IFormFile? ImageFile { get; set; } // لاستقبال الملف المرفوع
         public List<Comment> Comments { get; set; } = new List<Comment>(); // قائمة التعليقات
+        [Display(Name = "Categories")]
+        public List<int>? SelectedCategoryIds { get; set; } = [];
+        public List<Category>? AllAvailableCategories { get; set; } = [];
+
     }
 }

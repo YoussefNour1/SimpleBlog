@@ -47,30 +47,38 @@
             <div class="mb-3">
                 <label asp-for="Content" class="form-label"></label>
                 <!-- Place the following <script> and <textarea> tags your HTML's <body> -->
-                <script>
-                  tinymce.init({
-                    selector: 'textarea',
-                    plugins: [
-                      // Core editing features
-                      'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'image', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount',
-                      // Your account includes a free trial of TinyMCE premium features
-                      // Try the most popular premium features until Jun 13, 2025:
-                      'checklist', 'mediaembed', 'casechange', 'formatpainter', 'pageembed', 'a11ychecker', 'tinymcespellchecker', 'permanentpen', 'powerpaste', 'advtable', 'advcode', 'editimage', 'advtemplate', 'ai', 'mentions', 'tinycomments', 'tableofcontents', 'footnotes', 'mergetags', 'autocorrect', 'typography', 'inlinecss', 'markdown','importword', 'exportword', 'exportpdf'
-                    ],
-                    toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
-                    tinycomments_mode: 'embedded',
-                    tinycomments_author: 'Author name',
-                    mergetags_list: [
-                      { value: 'First.Name', title: 'First Name' },
-                      { value: 'Email', title: 'Email' },
-                    ],
-                    ai_request: (request, respondWith) => respondWith.string(() => Promise.reject('See docs to implement AI Assistant')),
-                  });
-                </script>
-                <textarea asp-for="Content" class="form-control" rows="10"></textarea>
+                <textarea asp-for="Content" class="form-control" rows="10" dir="auto"></textarea>
                 <span asp-validation-for="Content" class="text-danger"></span>
             </div>
-
+            <div class="mb-3">
+                <label asp-for="SelectedCategoryIds" class="form-label"></label>
+                @if (Model.AllAvailableCategories?.Any() ?? false)
+                {
+                    <div class="row">
+                        @foreach (var category in Model.AllAvailableCategories)
+                        {
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input type="checkbox"
+                                           name="SelectedCategoryIds"
+                                           value="@category.Id"
+                                           class="form-check-input"
+                                           id="category-@category.Id"
+                                    @(Model.SelectedCategoryIds != null && Model.SelectedCategoryIds.Contains(category.Id) ? "checked" : "") />
+                                    <label class="form-check-label" for="category-@category.Id">
+                                        @category.Name
+                                    </label>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <span asp-validation-for="SelectedCategoryIds" class="text-danger"></span>
+                }
+                else
+                {
+                    <p class="text-muted">No categories available.</p>
+                }
+            </div>
             <div class="mb-3">
                 <label asp-for="PublicationDate" class="form-label"></label>
                 <input asp-for="PublicationDate" class="form-control" readonly disabled/> 
@@ -105,6 +113,26 @@
                 preview.src = "#"; // Reset the preview if no file is selected
                 preview.style.display = "none"; // Hide the image preview
             }
+        });
+
+        tinymce.init({
+            selector: 'textarea#Content',
+            height: 400,
+            menubar: 'file edit view insert format tools table help',
+            plugins: [
+                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                'insertdatetime', 'media', 'table', 'help', 'wordcount',
+                'directionality'
+            ],
+            toolbar: 'undo redo | styles | bold italic underline | ' +
+                        'alignleft aligncenter alignright alignjustify | ' +
+                        'bullist numlist outdent indent | ' +
+                        'link image media | forecolor backcolor | ' +
+                        'ltr rtl | ' +
+                        'removeformat | help',
+            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:16px ; text-align: justify;}',
+            //directionality: 'rtl',
         });
     </script>
 }

@@ -54,12 +54,27 @@
 
                         <dt class="col-sm-3 col-md-2 text-muted">Published On:</dt>
                         <dd class="col-sm-9 col-md-10">@Model.PublicationDate.ToLocalTime().ToString("D")</dd>
+
+                        @if (Model.AllAvailableCategories != null && Model.AllAvailableCategories.Any())
+                        {
+                            <dt class="col-sm-3 col-md-2 text-muted mt-2 mt-sm-0">Categories:</dt>
+                            <dd class="col-sm-9 col-md-10 mt-2 mt-sm-0">
+                                @foreach (var category in Model.AllAvailableCategories)
+                                {
+                                    @* TODO: اللينك ده حاليًا بيودي للـ Index، ممكن نخليه يودي لصفحة بتفلتر بالـ Category بعدين *@
+                                    <a asp-action="Index" asp-controller="Posts" asp-route-categoryId="@category.Id"
+                                       class="badge badge-info mr-1" style="font-size: 0.8rem; text-decoration: none; color: white;">
+                                        @category.Name
+                                    </a>
+                                }
+                            </dd>
+                        }
                     </dl>
                 </div>
 
                 <hr class="mb-4" />
 
-                <div class="post-content lead" style="font-size: 1.1rem; line-height: 1.7;">
+                <div class="post-content lead" style="font-size: 1.1rem; line-height: 1.7; text-align:justify" dir="auto">
                     @Html.Raw(Model.Content)
                 </div>
 
@@ -69,7 +84,7 @@
 
         <div class="row mt-4">
             <div class="col-md-12">
-                <h3 class="mb-3"><img src="@Url.Content("/images/comment.png")" width="30px" height="30px"/> Comments (@(Model.Comments?.Count ?? 0))</h3>
+                <h3 class="mb-3"><img class="icon-link" src="@Url.Content("/images/comment.png")" width="30px" height="30px"/> Comments (@(Model.Comments?.Count ?? 0))</h3>
                 @if (Model.Comments == null || !Model.Comments.Any())
                 {
                     <p class="text-muted">No comments yet. Be the first to comment!</p>

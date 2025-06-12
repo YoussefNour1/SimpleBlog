@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SimpleBlog.Data;
 
@@ -10,9 +11,11 @@ using SimpleBlog.Data;
 namespace SimpleBlog.Migrations
 {
     [DbContext(typeof(SimpleBlogDbContext))]
-    partial class SimpleBlogDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250531105849_AddCategoriesTable")]
+    partial class AddCategoriesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.5");

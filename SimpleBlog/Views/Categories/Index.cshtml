@@ -1,0 +1,57 @@
+﻿@model IEnumerable<SimpleBlog.Entities.Category>
+@{
+    ViewBag.Title = "Categories";
+    Layout = "_AdminLayout";
+}
+<div class="mb-5">
+    <h1 class="display-5 fw-bold">All Categories</h1>
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="Create" class="btn btn-warning btn-lg mt-3">
+            <i class="fa fa-plus-circle me-2"></i> Create New Category
+        </a>
+    }
+</div>
+@if(!Model.Any())
+{
+    <div class="alert alert-light text-center shadow-sm">
+        <strong>No categories available.</strong> Please check back later!
+    </div>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Category Name</th>
+                <th>Posts Count</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var category in Model)
+            {
+                <tr>
+                    <td>
+                        <a asp-action="Details" asp-controller="Categories" asp-route-id="@category.Id">
+                            @category.Name
+                        </a>
+                    </td>
+                    <td>@category.Posts.Count</td>
+                    @*Actions*@
+                    <td>
+                        @Html.ActionLink("Edit", "Edit", new { Id = category.Id }) |
+                        @Html.ActionLink("Details", "Details", new { Id = category.Id }) |
+                        <form asp-action="Delete" asp-controller="Categories" asp-route-Id="@category.Id" method="post" style="display:inline;"
+                              onsubmit='return confirm("Are you sure you want to delete the category @category.Name? This action cannot be undone);'>
+                            <input type="hidden" name="Id" value="@category.Id" />
+                            <button type="submit" class="btn btn-link text-danger p-0">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+<a class="btn btn-link mb-3 ps-0" asp-action="Dashboard" asp-controller="Admin"><i class="fa fa-arrow-left"></i> Back to Dashboard</a>
