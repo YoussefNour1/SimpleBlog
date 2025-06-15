@@ -16,17 +16,25 @@ namespace SimpleBlog.Controllers
         private readonly SimpleBlogDbContext _context = Context;
         private readonly UserManager<ApplicationUser> _user = user;
         private readonly IWebHostEnvironment _host = webHost;
-        public async Task<IActionResult> Index(int pageNumber = 1)
+        public async Task<IActionResult> Index(string? Search, int pageNumber = 1)
         {
+            var query = _context.Posts.Include(p => p.User).Include(p => p.Categories).AsQueryable();
+            if (!string.IsNullOrEmpty(Search))
+            {
+                query = query.Where(p => p.Title.Contains(Search) || p.Content.Contains(Search));
+            }
+            var totalPostsCount = await query.CountAsync();
             var PostsPaginated = new PostsViewModel
             {
                 PageIndex = pageNumber,
                 PageSize = 6,
-                TotalCount = await _context.Posts.CountAsync()
+                TotalCount = totalPostsCount,
+                Search = Search
             };
-            var result = await _context.Posts
-                .Include(p=> p.User).Include(p => p.Categories)
-                .OrderByDescending(p=> p.PublicationDate)
+            TempData["Search"] = Search;
+
+            var result = await query
+                .OrderByDescending(p => p.PublicationDate)
                 .Skip((pageNumber - 1) * PostsPaginated.PageSize)
                 .Take(PostsPaginated.PageSize)
                 .ToListAsync();
@@ -71,7 +79,7 @@ namespace SimpleBlog.Controllers
                 Comments = [.. _context.Comments.Where(c => c.PostId == Result.Id).Include(c => c.User)],
                 IsOwner = flag,
                 PostImagePath = Result.PostImagePath,
-                SelectedCategoryIds = Result.Categories?.Select(c => c.Id).ToList()?? new List<int>(),
+                SelectedCategoryIds = Result.Categories?.Select(c => c.Id).ToList() ?? new List<int>(),
                 AllAvailableCategories = [.. Result.Categories]
             };
             return View(post);
@@ -91,7 +99,7 @@ namespace SimpleBlog.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateAsync(PostViewModel post)
         {
-            var LoggedUser= await _user.GetUserAsync(User);
+            var LoggedUser = await _user.GetUserAsync(User);
             var LoggedUserId = await _user.GetUserIdAsync(LoggedUser);
             var LoggedUserName = await _user.GetUserNameAsync(LoggedUser);
             if (LoggedUser == null)
@@ -153,7 +161,7 @@ namespace SimpleBlog.Controllers
                 Content = Result.Content,
                 PublicationDate = Result.PublicationDate,
                 Author = Result.AuthorName ?? "No Author",
-                PostImagePath = Result.PostImagePath ,
+                PostImagePath = Result.PostImagePath,
                 AllAvailableCategories = [.. _context.Categories],
                 SelectedCategoryIds = Result.Categories?.Select(c => c.Id).ToList() ?? [],
             };
@@ -166,8 +174,8 @@ namespace SimpleBlog.Controllers
         {
             var LoggedUser = await _user.GetUserAsync(User);
             var LoggedUserId = await _user.GetUserIdAsync(LoggedUser);
-            var postToUpdate = await _context.Posts.Include(p=>p.Categories).FirstOrDefaultAsync(p => p.Id == postViewModel.Id);
-            
+            var postToUpdate = await _context.Posts.Include(p => p.Categories).FirstOrDefaultAsync(p => p.Id == postViewModel.Id);
+
             if (postToUpdate == null)
             {
                 return NotFound();
@@ -257,7 +265,7 @@ namespace SimpleBlog.Controllers
         {
             if (imageFile == null || imageFile.Length == 0)
             {
-                return null; 
+                return null;
             }
             string uploadsFolder = Path.Combine(_host.WebRootPath, "images", "posts");
             if (!Directory.Exists(uploadsFolder))

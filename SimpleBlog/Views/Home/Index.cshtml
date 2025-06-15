@@ -1,8 +1,182 @@
-﻿@{
+﻿@model SimpleBlog.ViewModels.HomePageViewModel
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- CDN for Swiper.js (Carousel library) -->
+<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+<style>
+    /* Custom styles for the homepage */
+    .hero-section {
+        position: relative;
+        height: 50vh;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url(@(Model.FeaturedPost?.PostImagePath ?? "/images/placeholder.png"));
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+        }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: bold;
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+    }
+
+    .hero-author {
+        font-size: 1.2rem;
+    }
+
+    .section-title {
+        font-weight: bold;
+        margin-bottom: 30px;
+        position: relative;
+        display: inline-block;
+    }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background-color: #0d6efd;
+        }
+
+    .swiper-container {
+        width: 100%;
+        padding-top: 20px;
+        padding-bottom: 50px; /* This padding makes space for the pagination */
+    }
+
+    .swiper-slide {
+        width: 300px;
+    }
+
+    .swiper-pagination-bullets {
+        bottom: 40px !important; /* Pushes the dots down */
+    }
+
+    .card-category {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .card-category:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        }
+</style>
+
+<div class="container-fluid p-0">
+
+    <!-- 1. Hero Section -->
+    @if (Model.FeaturedPost != null)
+    {
+        <section class="hero-section">
+            <div>
+                <h1 class="hero-title">@Model.FeaturedPost.Title</h1>
+                <p class="hero-author">By @(Model.FeaturedPost.User?.DisplayName ?? Model.FeaturedPost.AuthorName)</p>
+                <a asp-controller="Posts" asp-action="Details" asp-route-id="@Model.FeaturedPost.Id" class="btn btn-primary btn-lg mt-3">Read Full Story</a>
+            </div>
+        </section>
+    }
+
+    <div class="container mt-5">
+
+        <!-- 2. Latest Posts Carousel -->
+        <section class="py-5 text-center">
+            <h2 class="section-title">Latest Articles</h2>
+            <div class="swiper-container latest-posts-swiper">
+                <div class="swiper-wrapper">
+                    @foreach (var post in Model.LatestPosts)
+                    {
+                        <div class="swiper-slide">
+                            <div class="card h-100 shadow-sm">
+                                <a asp-controller="Posts" asp-action="Details" asp-route-id="@post.Id">
+                                    <img src="@(post.PostImagePath ?? "/images/images.png")" class="card-img-top" alt="@post.Title" style="height: 180px; object-fit: cover;">
+                                </a>
+                                <div class="card-body">
+                                    <h5 class="card-title" style="font-size: 1.1rem;">@post.Title</h5>
+                                </div>
+                                <div class="card-footer bg-white border-0 pt-0">
+                                    <a asp-controller="Posts" asp-action="Details" asp-route-id="@post.Id" class="btn btn-sm btn-outline-primary">Read More</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <!-- Add Pagination -->
+                <div class="swiper-pagination"></div>
+            </div>
+        </section>
+
+        <!-- 3. Popular Categories -->
+        <section class="py-5 text-center bg-light">
+            <h2 class="section-title">Popular Categories</h2>
+            <div class="row justify-content-center">
+                @foreach (var category in Model.PopularCategories)
+                {
+                    <div class="col-md-3 col-6 mb-4">
+                        <div class="card card-category text-center p-4 shadow-sm">
+                            <h4 class="card-title">@category.Name</h4>
+                            <p class="text-muted">@category.Posts.Count() Articles</p>
+                            <a href="#" class="stretched-link"></a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <!-- 4. Call to Action -->
+        <section class="py-5 text-center">
+            @if (User.Identity.IsAuthenticated)
+            {
+                <h2>Create A Post Now</h2>
+                <a asp-action="Create" asp-controller="Post" class="btn btn-success btn-lg">Become an Author</a>
+            }
+            else
+            {
+                <h2>Join Our Community</h2>
+                <p class="lead">Have a story to tell? An idea to share? Register now and start writing!</p>
+                <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-success btn-lg">Become an Author</a>
+            }
+        </section>
+    </div>
 </div>
+
+<script>
+    // Initialize the Swiper Carousel
+    document.addEventListener('DOMContentLoaded', function () {
+        var swiper = new Swiper('.latest-posts-swiper', {
+            slidesPerView: 'auto',
+            spaceBetween: 30,
+            centeredSlides: true,
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            loop: true,
+            autoplay: {
+                delay: 2500,
+                disableOnInteraction: false,
+            },
+        });
+    });
+</script>
