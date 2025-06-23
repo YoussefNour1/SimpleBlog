@@ -12,7 +12,7 @@ This platform is packed with features designed for a rich user experience and ro
 - **Interactive Homepage:** A dynamic "magazine-style" landing page featuring a "Hero" section for the latest post, a swipeable carousel for recent articles (powered by Swiper.js), and a section for popular categories.
 - **Intelligent Search:** A robust search functionality integrated directly into the main blog page, supporting live filtering and full pagination of search results.
 - **Rich Text Editor:** A WYSIWYG editor (TinyMCE) is integrated for an intuitive post-writing experience, allowing for easy formatting like bold, italics, lists, and headings.
-- **🌍 Multi-Language Support:** The blog is designed to handle both Arabic (RTL) and English (LTR) content seamlessly.
+- **🌍 Multi-Language Post Support:** The blog is designed to handle both Arabic (RTL) and English (LTR) content seamlessly.
 
 ### 🚀 Real-time Notification System (SignalR)
 A complete, real-time notification system to keep users engaged.
