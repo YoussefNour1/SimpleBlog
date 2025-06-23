@@ -1,4 +1,4 @@
-ر# 📝 SimpleBlog - A Dynamic Blog Platform with Real-time Notifications
+# 📝 SimpleBlog - A Dynamic Blog Platform with Real-time Notifications
 
 SimpleBlog has evolved beyond a basic content-sharing site into a feature-rich, interactive, and modern web application. It's a complete content management system built from the ground up, featuring a powerful role-based user system, a dynamic user interface, and a sophisticated real-time notification system powered by SignalR.
 
