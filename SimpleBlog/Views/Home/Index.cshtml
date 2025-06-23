@@ -148,8 +148,9 @@
         <section class="py-5 text-center">
             @if (User.Identity.IsAuthenticated)
             {
-                <h2>Create A Post Now</h2>
-                <a asp-action="Create" asp-controller="Post" class="btn btn-success btn-lg">Become an Author</a>
+                
+                <a asp-action="Create" asp-controller="Posts" class="btn btn-warning btn-lg">Create A Post Now</a>
+                
             }
             else
             {

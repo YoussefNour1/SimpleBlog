@@ -7,9 +7,10 @@
     <meta name="author" content="Your Name or Blog Name">
     <title>@ViewData["Title"] - SimpleBlog</title>
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" xintegrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:100,200,300,400,500,600,700|Playfair+Display:400,700,900" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" rel="stylesheet">
+    <!-- Using a newer version of Font Awesome for better icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css">
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/animate.css" asp-append-version="true">
@@ -17,15 +18,66 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <script src="https://cdn.tiny.cloud/1/82u28nluhhp7wnr739bd27tri1pnpidlf1de38hzjfv9cjp6/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
 
+    <!-- Custom CSS for Notifications -->
+    <style>
+    .notification-bell {
+        position: relative;
+        cursor: pointer;
+    }
+    .notification-count {
+        position: absolute;
+        top: -2px;
+        right: -5px;
+        background-color: #FFD700;
+        color: black;
+        border-radius: 50%;
+        padding: 1px 5px;
+        font-size: 0.7rem;
+        font-weight: bold;
+        border: 1px solid white;
+        display: none;
+    }
+    .notification-toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #343a40;
+        color: white;
+        padding: 15px;
+        border-radius: 5px;
+        z-index: 1055;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.5s, bottom 0.5s;
+    }
+    .notification-toast.show {
+        display: block;
+        opacity: 1;
+        bottom: 40px;
+    }
+    .notification-item {
+        white-space: normal;
+        font-size: 0.9rem;
+    }
+    .notification-item small {
+        font-size: 0.75rem;
+    }
+    #notificationList.dropdown-menu {
+        max-height: 400px;
+        overflow-y: auto;  
+        width: 350px;
+    }
+    .dropdown-menu-right {
+        right: 0 !important;
+        left: auto !important;
+    }
+</style>
 </head>
 <body>
     <header class="mb-3">
         <nav class="navbar navbar-expand-lg navbar-dark cyan fixed-top">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Posts" asp-action="Index">
-                    @*
-                    <img src="~/images/nav-logo.png" alt="SimpleBlog Logo" style="max-height: 80px; width:auto">
-                   *@
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
                     <h3 style="font-family: 'Pacifico', cursive; ">
                         <span style="color: white;">Simple</span><span style="color: #FFD700;">Blog</span>
                     </h3>
@@ -42,6 +94,7 @@
                             <a class="nav-link" asp-area="" asp-controller="Posts" asp-action="Index">Blog Posts</a>
                         </li>
                     </ul>
+                    <!-- The login partial will be rendered here with all the new controls -->
                     <partial name="_LoginPartial" />
                 </div>
             </div>
@@ -97,12 +150,14 @@
         </section>
     </footer>
 
-    <a href="javascript:" id="return-to-top"><i class="fa fa-long-arrow-up" aria-hidden="true"></i></a>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    
+    @await RenderSectionAsync("Scripts", required:false)
+    
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.5/signalr.min.js"></script>
     <script src="~/js/animate.js" asp-append-version="true"></script>
     <script src="~/js/custom.js" asp-append-version="true"></script>
     <script>
@@ -110,21 +165,150 @@
             event.preventDefault();
             $(this).ekkoLightbox();
         });
-        // Add your custom JS for return-to-top if it's in custom.js or here
         $(window).scroll(function() {
-            if ($(this).scrollTop() >= 50) {
-                $('#return-to-top').fadeIn(200);
-            } else {
-                $('#return-to-top').fadeOut(200);
-            }
+            if ($(this).scrollTop() >= 50) { $('#return-to-top').fadeIn(200); } else { $('#return-to-top').fadeOut(200); }
         });
-        $('#return-to-top').click(function() {
-            $('body,html').animate({
-                scrollTop : 0
-            }, 500);
-        });
+        $('#return-to-top').click(function() { $('body,html').animate({ scrollTop : 0 }, 500); });
     </script>
 
-    @await RenderSectionAsync("Scripts", required: false)
+    @if (User.Identity.IsAuthenticated)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const connection = new signalR.HubConnectionBuilder().withUrl("/notificationHub").build();
+                const notificationList = document.getElementById('notificationList');
+                const countElement = document.getElementById('notificationCount');
+                const notificationDropdown = document.getElementById('notificationDropdown');
+
+                let currentPage = 1;
+                let isLoading = false;
+                let hasMoreNotifications = true;
+
+                function updateCountBadge(count) {
+                    if (countElement) {
+                        if (count > 0) {
+                            countElement.innerText = count;
+                            countElement.style.display = 'block';
+                        } else {
+                            countElement.style.display = 'none';
+                        }
+                    }
+                }
+
+                // This is the function that was missing
+                function loadNotifications(page) {
+                    if (isLoading || !hasMoreNotifications && page > 1) return;
+                    isLoading = true;
+
+                    fetch(`/api/notifications?pageNumber=${page}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (page === 1) {
+                                notificationList.innerHTML = '';
+                                updateCountBadge(data.unreadCount);
+                            }
+
+                            data.notifications.forEach(n => {
+                                const item = document.createElement('a');
+                                item.href = n.url;
+                                item.className = 'dropdown-item notification-item';
+                                item.setAttribute('data-id', n.id);
+                                item.innerHTML = `${n.message} <br /> <small class="text-muted">${new Date(n.notificationDate).toLocaleString()}</small>`;
+                                if (!n.isRead) item.style.fontWeight = 'bold';
+                                notificationList.appendChild(item);
+                            });
+
+                            hasMoreNotifications = data.hasMore;
+                            if (!hasMoreNotifications && data.notifications.length > 0) {
+                                 notificationList.insertAdjacentHTML('beforeend', '<li><hr class="dropdown-divider"></li><li><p class="dropdown-item text-center text-muted mb-0">No more notifications</p></li>');
+                            } else if (data.notifications.length === 0 && page === 1) {
+                                 notificationList.innerHTML = '<li><p class="dropdown-item text-center text-muted mb-0">You have no notifications yet.</p></li>';
+                            }
+
+                            currentPage = page + 1;
+                            isLoading = false;
+                        }).catch(error => {
+                            console.error("Error loading notifications:", error);
+                            isLoading = false;
+                        });
+                }
+
+                // Event listener for clicking the bell
+                notificationDropdown.addEventListener('click', function() {
+                    currentPage = 1;
+                    hasMoreNotifications = true;
+                    loadNotifications(currentPage);
+                });
+
+                // Event listener for marking a notification as read
+                notificationList.addEventListener('click', function(event) {
+                    const link = event.target.closest('.notification-item');
+                    if (link) {
+                        event.preventDefault();
+                        const id = link.getAttribute('data-id');
+                        const isUnread = link.style.fontWeight === 'bold';
+
+                        if (isUnread) {
+                            fetch(`/api/notifications/markasread/${id}`, { method: 'POST' })
+                                .then(res => res.json())
+                                .then(data => {
+                                    updateCountBadge(data.newUnreadCount);
+                                    link.style.fontWeight = 'normal';
+                                })
+                                .finally(() => window.location.href = link.href);
+                        } else {
+                            window.location.href = link.href;
+                        }
+                    }
+                });
+
+                // Event listener for infinite scroll
+                notificationList.addEventListener('scroll', function() {
+                    if (this.scrollTop + this.clientHeight >= this.scrollHeight - 20) {
+                        loadNotifications(currentPage);
+                    }
+                });
+
+                // Handling incoming real-time notifications
+                connection.on("ReceiveNotification", function (message, url) {
+                    showSafeToast(message, url);
+                    if(countElement){
+                        let currentCount = parseInt(countElement.innerText) || 0;
+                        updateCountBadge(currentCount + 1);
+                    }
+                });
+                // Handling the notification update
+                connection.on("RefreshNotifications", function () {
+                    console.log("Refresh signal received. Reloading notifications.");
+                    loadNotifications(1);
+                    if(countElement){
+                        let currentCount = parseInt(countElement.innerText) || 0;
+                        updateCountBadge(currentCount - 1);
+                    }
+                });
+                // Starting the connection
+                async function start() {
+                    try {
+                        await connection.start();
+                        console.log("SignalR Connected.");
+                        fetch('/api/notifications?pageNumber=1').then(r=>r.json()).then(d=>updateCountBadge(d.unreadCount));
+                    } catch (err) { setTimeout(start, 5000); }
+                };
+                connection.onclose(start);
+                start();
+
+                // Safe function to show toast popups
+                function showSafeToast(message, url) {
+                    const toast = document.getElementById('notificationToast');
+                    if (toast) {
+                        toast.innerHTML = `<a href="${url}" class="text-white text-decoration-none">${message}</a>`;
+                        toast.classList.add('show');
+                        setTimeout(() => toast.classList.remove('show'), 5000);
+                    }
+                }
+            });
+        </script>
+    }
+
 </body>
 </html>

@@ -3,6 +3,7 @@ using SimpleBlog.Data;
 using SimpleBlog.Services;
 using Microsoft.AspNetCore.Identity;
 using SimpleBlog.Entities;
+using SimpleBlog.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,8 @@ builder.Services
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+// Add SignalR services
+builder.Services.AddSignalR();
 var app = builder.Build();
 
 //Seeding Roles
@@ -54,7 +57,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.MapRazorPages();
 app.UseRouting();
-
+app.MapHub<NotificationHub>("/notificationHub"); // Register the SignalR hub
 app.UseAuthorization();
 
 app.MapControllerRoute(
